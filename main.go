@@ -45,17 +45,19 @@ func main() {
 		if useWhatsApp {
 			client := planner.NewClient()
 
-			//NOTE: Needs QR Login via terminal on first startup
+			// NOTE: Needs QR Login via terminal on first startup
 			planner.Login(client)
-			JIDs := planner.PhoneNumbersToJIDs
 
-			if !planner.GroupExists(client, members, whatsAppGroup) {
+			phoneNumbers := []string{}
+			JIDs := planner.PhoneNumbersToJIDs(client, phoneNumbers)
+
+			if !planner.GroupExists(client, phoneNumbers, whatsAppGroup) {
 				client.CreateGroup(whatsAppGroup, JIDs)
 			}
 
-			for i, member := range myHouseHold.Members {
-				assignedTasks := myHouseHold.GetAssignedTasks(member)
-				message := planner.CreateTaskMessage(member, assignedTasks)
+			for i, member := range myHousehold.Members {
+				assignedTasks := myHousehold.GetAssignedTasks(member)
+				message := planner.CreateDailyTaskMessage(assignedTasks, member)
 
 				JID := JIDs[i]
 				_, err := client.SendMessage(JID, message)
@@ -64,7 +66,7 @@ func main() {
 				}
 			}
 
-		// Send messages via twilio sms
+			// Send messages via twilio sms
 		} else {
 			client := planner.InitializeTwilioClient()
 			for _, member := range myHousehold.Members {

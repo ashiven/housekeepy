@@ -81,7 +81,7 @@ func SendMessageWhatsapp(client *twilio.RestClient, receiver *Member, tasks []As
 	}
 }
 
-func createDailyTaskMessage(tasks []Assignable, member *Member) string {
+func CreateDailyTaskMessage(tasks []Assignable, member *Member) string {
 	message := fmt.Sprintf("%s! Deine heutigen Aufgaben sind:\n", member.Name)
 
 	dailyTasks := "\n"
@@ -95,7 +95,7 @@ func createDailyTaskMessage(tasks []Assignable, member *Member) string {
 func SendMessageSms(client *twilio.RestClient, receiver *Member, tasks []Assignable, debug bool) {
 	sender := GetEnvVar("SMS_SENDER")
 
-	message := createDailyTaskMessage(tasks, receiver)
+	message := CreateDailyTaskMessage(tasks, receiver)
 
 	if debug {
 		fmt.Println("[DEBUG] Sender:", sender)
