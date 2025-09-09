@@ -3,10 +3,9 @@ package planner
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
-	"slices"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/mdp/qrterminal/v3"
 	"go.mau.fi/whatsmeow"
 	"go.mau.fi/whatsmeow/store/sqlstore"
@@ -20,12 +19,12 @@ func NewWhatsmeowClient() *whatsmeow.Client {
 
 	container, err := sqlstore.New(ctx, "sqlite3", "file:devicestore.db?_foreign_keys=on", dbLogger)
 	if err != nil {
-		log.Fatalln("[ERROR} NewWhatsmeowClient: Failed to get device storage container:, err")
+		fmt.Println("[ERROR] NewWhatsmeowClient: ", err)
 	}
 
 	device, err := container.GetFirstDevice(ctx)
 	if err != nil {
-		log.Fatalln("[ERROR] NewWhatsmeowClient: Failed to get device from container:, err")
+		fmt.Println("[ERROR] NewWhatsmeowClient: ", err)
 	}
 
 	clientLogger := waLogger.Stdout("Client", "INFO", true)
@@ -39,7 +38,7 @@ func Login(client *whatsmeow.Client) {
 		qrChannel, _ := client.GetQRChannel(context.Background())
 		err := client.Connect()
 		if err != nil {
-			log.Fatalln("[ERROR] Client failed to connect: ", err)
+			fmt.Println("[ERROR] Login: ", err)
 		}
 
 		for event := range qrChannel {
@@ -58,52 +57,30 @@ func Login(client *whatsmeow.Client) {
 	} else {
 		err := client.Connect()
 		if err != nil {
-			log.Fatalln("[ERROR] Client failed to connect: ", err)
+			fmt.Println("[ERROR] Login: ", err)
 		}
 	}
 }
 
-func PhoneNumbersToJIDs(client *whatsmeow.Client, phoneNumbers []string) []types.JID {
-	JIDs := []types.JID{}
+func PhoneNumbersToJIDs(client *whatsmeow.Client, phoneNumbers []string) map[string]types.JID {
+	JIDs := map[string]types.JID{}
 
 	isOnWhatsAppRes, err := client.IsOnWhatsApp(phoneNumbers)
 	if err != nil {
-		log.Fatalln("[ERROR] Client failed to get isOnWhatsApp: ", err)
+		fmt.Println("[ERROR] IsOnWhatsApp: ", err)
 	}
 
-	for i, whatsAppRes := range isOnWhatsAppRes {
-		relatedPhone := phoneNumbers[i]
+	for _, whatsAppRes := range isOnWhatsAppRes {
+		phoneNumber := "+" + whatsAppRes.JID.User
 
 		if whatsAppRes.IsIn {
-			fmt.Printf("[INFO] %s found on whatsapp", relatedPhone)
-			JIDs = append(JIDs, whatsAppRes.JID)
+			fmt.Printf("[INFO] %s found on whatsapp\n", phoneNumber)
+			JIDs[phoneNumber] = whatsAppRes.JID
 
 		} else {
-			fmt.Printf("[INFO] %s is not on whatsapp", relatedPhone)
-			JIDs = append(JIDs, types.JID{})
+			fmt.Printf("[INFO] %s is not on whatsapp\n", phoneNumber)
+			JIDs[phoneNumber] = types.JID{}
 		}
 	}
 	return JIDs
-}
-
-func GroupExists(client *whatsmeow.Client, phoneNumbers []string, groupName string) bool {
-	JIDs := PhoneNumbersToJIDs(client, phoneNumbers)
-
-	joinedGroups, err := client.GetJoinedGroups()
-	if err != nil {
-		log.Fatalln("[ERROR] Client failed to get joinedGroups: ", err)
-	}
-
-	for _, group := range joinedGroups {
-		for _, groupMember := range group.Participants {
-			if !slices.Contains(JIDs, groupMember.JID) {
-				return false
-			}
-		}
-		if group.Name != groupName {
-			return false
-		}
-	}
-
-	return true
 }

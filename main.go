@@ -50,22 +50,23 @@ func main() {
 
 			// NOTE: Needs QR Login via terminal on first startup
 			planner.Login(client)
+			time.Sleep(time.Second * 30)
 
 			phoneNumbers := myHousehold.PhoneNumbers()
 			JIDs := planner.PhoneNumbersToJIDs(client, phoneNumbers)
 
-			for i, member := range myHousehold.Members {
+			for _, member := range myHousehold.Members {
 				assignedTasks := myHousehold.GetAssignedTasks(member)
 				message := planner.CreateDailyTaskMessage(assignedTasks, member)
 
 				if debug {
 					pretty.Println("[DEBUG] member: ", member)
+					pretty.Println("[DEBUG] phoneNumber: ", member.PhoneNumber)
+					pretty.Println("[DEBUG] JID: ", JIDs[member.PhoneNumber])
 					pretty.Println("[DEBUG] message: ", message)
-					pretty.Println("[DEBUG] phoneNumber: ", phoneNumbers[i])
-					pretty.Println("[DEBUG] JID: ", JIDs[i])
 
 				} else {
-					JID := JIDs[i]
+					JID := JIDs[member.PhoneNumber]
 					waMessage := &waE2E.Message{Conversation: proto.String(message)}
 					_, err := client.SendMessage(context.Background(), JID, waMessage)
 					if err != nil {

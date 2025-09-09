@@ -1,3 +1,4 @@
 twilio-join-sandbox.txt
 config.ini.local
 .env.local
+devicestore.db
