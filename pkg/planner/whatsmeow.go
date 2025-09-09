@@ -1,6 +1,5 @@
 package planner
 
-// TODO: imports
 import (
 	"context"
 	"fmt"
@@ -15,18 +14,18 @@ import (
 	waLogger "go.mau.fi/whatsmeow/util/log"
 )
 
-func NewClient() *whatsmeow.Client {
+func NewWhatsmeowClient() *whatsmeow.Client {
 	dbLogger := waLogger.Stdout("Database", "DEBUG", true)
 	ctx := context.Background()
 
 	container, err := sqlstore.New(ctx, "sqlite3", "file:devicestore.db?_foreign_keys=on", dbLogger)
 	if err != nil {
-		log.Fatalln("newClient: Failed to get device storage container:, err")
+		log.Fatalln("[ERROR} NewWhatsmeowClient: Failed to get device storage container:, err")
 	}
 
 	device, err := container.GetFirstDevice(ctx)
 	if err != nil {
-		log.Fatalln("newClient: Failed to get device from container:, err")
+		log.Fatalln("[ERROR] NewWhatsmeowClient: Failed to get device from container:, err")
 	}
 
 	clientLogger := waLogger.Stdout("Client", "INFO", true)
@@ -40,18 +39,18 @@ func Login(client *whatsmeow.Client) {
 		qrChannel, _ := client.GetQRChannel(context.Background())
 		err := client.Connect()
 		if err != nil {
-			log.Fatalln("Client failed to connect: ", err)
+			log.Fatalln("[ERROR] Client failed to connect: ", err)
 		}
 
 		for event := range qrChannel {
 			// Login with QR Code
 			if event.Event == "code" {
-				fmt.Println("Login with QR Code: ", event.Code)
+				fmt.Println("[INFO] Login with QR Code: ", event.Code)
 				qrterminal.GenerateHalfBlock(event.Code, qrterminal.L, os.Stdout)
 
 				// Login event
 			} else {
-				fmt.Println("Login event: ", event.Event)
+				fmt.Println("[INFO] Login event: ", event.Event)
 			}
 		}
 
@@ -59,7 +58,7 @@ func Login(client *whatsmeow.Client) {
 	} else {
 		err := client.Connect()
 		if err != nil {
-			log.Fatalln("Client failed to connect: ", err)
+			log.Fatalln("[ERROR] Client failed to connect: ", err)
 		}
 	}
 }
@@ -69,18 +68,18 @@ func PhoneNumbersToJIDs(client *whatsmeow.Client, phoneNumbers []string) []types
 
 	isOnWhatsAppRes, err := client.IsOnWhatsApp(phoneNumbers)
 	if err != nil {
-		log.Fatalln("Client failed to get isOnWhatsApp: ", err)
+		log.Fatalln("[ERROR] Client failed to get isOnWhatsApp: ", err)
 	}
 
 	for i, whatsAppRes := range isOnWhatsAppRes {
 		relatedPhone := phoneNumbers[i]
 
 		if whatsAppRes.IsIn {
-			fmt.Printf("%s found on whatsapp", relatedPhone)
+			fmt.Printf("[INFO] %s found on whatsapp", relatedPhone)
 			JIDs = append(JIDs, whatsAppRes.JID)
 
 		} else {
-			fmt.Printf("%s is not on whatsapp", relatedPhone)
+			fmt.Printf("[INFO] %s is not on whatsapp", relatedPhone)
 			JIDs = append(JIDs, types.JID{})
 		}
 	}
@@ -92,7 +91,7 @@ func GroupExists(client *whatsmeow.Client, phoneNumbers []string, groupName stri
 
 	joinedGroups, err := client.GetJoinedGroups()
 	if err != nil {
-		log.Fatalln("Client failed to get joinedGroups: ", err)
+		log.Fatalln("[ERROR] Client failed to get joinedGroups: ", err)
 	}
 
 	for _, group := range joinedGroups {

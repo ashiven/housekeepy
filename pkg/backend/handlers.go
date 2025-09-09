@@ -78,7 +78,7 @@ func getMembers(w http.ResponseWriter, r *http.Request) {
 
 func updateMembers(w http.ResponseWriter, r *http.Request) {
 	handleUpdate(w, r, "Members", func(member *planner.Member) {
-		household.Config.Set("Members", member.Name, member.Phonenumber)
+		household.Config.Set("Members", member.Name, member.PhoneNumber)
 	}, func(updatedMembers []*planner.Member) {
 		household.Members = updatedMembers
 	})
