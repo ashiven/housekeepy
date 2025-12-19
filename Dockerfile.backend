@@ -1,16 +1,18 @@
-FROM golang:1.24.6 AS builder
+FROM golang:1.24-alpine AS builder
+ENV CGO_ENABLED=1
+RUN apk add --no-cache gcc musl-dev sqlite-dev
 WORKDIR /app
-
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 go build -o backend main.go
+RUN go build -o backend main.go
 
-FROM gcr.io/distroless/static-debian12
+FROM alpine:3.21
+RUN apk add --no-cache sqlite-libs
 WORKDIR /app
 COPY --from=builder /app/backend .
 COPY .env .
 COPY config.ini .
 
 EXPOSE 8080
-CMD ["./backend"]
+CMD ["./backend", "-w"]
