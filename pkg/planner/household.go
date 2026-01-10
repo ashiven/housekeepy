@@ -13,7 +13,7 @@ const configPath = "config.ini"
 
 type Member struct {
 	Name        string
-	Phonenumber string
+	PhoneNumber string
 }
 
 type Household struct {
@@ -30,10 +30,10 @@ type Household struct {
 	remainingMonthlyTasks int
 }
 
-func NewMember(name string, phonenumber string) *Member {
+func NewMember(name string, phoneNumber string) *Member {
 	return &Member{
 		Name:        name,
-		Phonenumber: phonenumber,
+		PhoneNumber: phoneNumber,
 	}
 }
 
@@ -96,4 +96,13 @@ func NewHousehold() (*Household, error) {
 		remainingWeeklyTasks:  len(weeklyTasks),
 		remainingMonthlyTasks: len(monthlyTasks),
 	}, nil
+}
+
+func (h *Household) PhoneNumbers() []string {
+	phoneNumbers := []string{}
+	for _, member := range h.Members {
+		phoneNumbers = append(phoneNumbers, member.PhoneNumber)
+	}
+
+	return phoneNumbers
 }

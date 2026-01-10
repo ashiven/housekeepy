@@ -56,7 +56,7 @@ func SendMessageWhatsapp(client *twilio.RestClient, receiver *Member, tasks []As
 		fmt.Println("[DEBUG] Template SID:", templateSid)
 		fmt.Println("[DEBUG] Service SID:", serviceSid)
 		fmt.Println("[DEBUG] Sender:", sender)
-		fmt.Println("[DEBUG] Receiver:", receiver.Name, "(", receiver.Phonenumber, ")")
+		fmt.Println("[DEBUG] Receiver:", receiver.Name, "(", receiver.PhoneNumber, ")")
 		fmt.Println("[DEBUG] Sending message with the following content variables:")
 		fmt.Println(string(ContentVariables))
 		return
@@ -64,7 +64,7 @@ func SendMessageWhatsapp(client *twilio.RestClient, receiver *Member, tasks []As
 
 	params := &api.CreateMessageParams{}
 	params.SetContentSid(templateSid)
-	params.SetTo("whatsapp:" + receiver.Phonenumber)
+	params.SetTo("whatsapp:" + receiver.PhoneNumber)
 	params.SetFrom("whatsapp:" + sender)
 	params.SetContentVariables(string(ContentVariables))
 	params.SetMessagingServiceSid(serviceSid)
@@ -81,7 +81,7 @@ func SendMessageWhatsapp(client *twilio.RestClient, receiver *Member, tasks []As
 	}
 }
 
-func createDailyTaskMessage(tasks []Assignable, member *Member) string {
+func CreateDailyTaskMessage(tasks []Assignable, member *Member) string {
 	message := fmt.Sprintf("%s! Deine heutigen Aufgaben sind:\n", member.Name)
 
 	dailyTasks := "\n"
@@ -95,18 +95,18 @@ func createDailyTaskMessage(tasks []Assignable, member *Member) string {
 func SendMessageSms(client *twilio.RestClient, receiver *Member, tasks []Assignable, debug bool) {
 	sender := GetEnvVar("SMS_SENDER")
 
-	message := createDailyTaskMessage(tasks, receiver)
+	message := CreateDailyTaskMessage(tasks, receiver)
 
 	if debug {
 		fmt.Println("[DEBUG] Sender:", sender)
-		fmt.Println("[DEBUG] Receiver:", receiver.Name, "(", receiver.Phonenumber, ")")
+		fmt.Println("[DEBUG] Receiver:", receiver.Name, "(", receiver.PhoneNumber, ")")
 		fmt.Println("[DEBUG] Sending message:")
 		fmt.Println(message)
 		return
 	}
 
 	params := &api.CreateMessageParams{}
-	params.SetTo(receiver.Phonenumber)
+	params.SetTo(receiver.PhoneNumber)
 	params.SetFrom(sender)
 	params.SetBody(message)
 

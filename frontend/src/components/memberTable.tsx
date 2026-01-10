@@ -12,21 +12,23 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
 
 interface Member {
   Name: string;
-  Phonenumber: string;
+  PhoneNumber: string;
 }
 
-export default function MembersTable({ members }: { members: Member[] }) {
-  const [tableData, setTableData] = React.useState<Member[]>(members);
+export default function MembersTable({ members = []}: { members?: Member[] }) {
+  const [tableData, setTableData] = React.useState<Member[]>(members ?? []);
   const [open, setOpen] = React.useState(false);
   const [editIndex, setEditIndex] = React.useState<number | null>(null);
   const [formData, setFormData] = React.useState<Member>({
     Name: "",
-    Phonenumber: "",
+    PhoneNumber: "",
   });
   const [nameDisabled, setNameDisabled] = React.useState(false);
 
   React.useEffect(() => {
-    setTableData(members);
+    if (Array.isArray(members)) {
+        setTableData(members);
+    }
   }, [members]);
 
   React.useEffect(() => {
@@ -82,7 +84,7 @@ export default function MembersTable({ members }: { members: Member[] }) {
 
   const startAdd = () => {
     setEditIndex(null);
-    setFormData({ Name: "", Phonenumber: "" });
+    setFormData({ Name: "", PhoneNumber: "" });
     setOpen(true);
     setNameDisabled(false);
   };
@@ -115,10 +117,10 @@ export default function MembersTable({ members }: { members: Member[] }) {
           </tr>
         </thead>
         <tbody>
-          {tableData.map((member, index) => (
+          {tableData.length > 0 && tableData.map((member, index) => (
             <tr key={index}>
               <td>{member.Name}</td>
-              <td>{member.Phonenumber.slice(0, 9) + "..."}</td>
+              <td>{member.PhoneNumber.slice(0, 9) + "..."}</td>
               <td>
                 <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                   <Button
@@ -164,9 +166,9 @@ export default function MembersTable({ members }: { members: Member[] }) {
             />
             <Input
               placeholder="Telefonnummer"
-              value={formData.Phonenumber}
+              value={formData.PhoneNumber}
               onChange={(e) =>
-                setFormData({ ...formData, Phonenumber: e.target.value })
+                setFormData({ ...formData, PhoneNumber: e.target.value })
               }
             />
             <Button color="success" onClick={saveEdit}>

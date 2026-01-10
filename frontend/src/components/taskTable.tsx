@@ -12,7 +12,7 @@ const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
 
 interface Member {
   Name: string;
-  Phonenumber: string;
+  PhoneNumber: string;
 }
 
 interface Task {
@@ -22,12 +22,12 @@ interface Task {
 
 export default function TaskTable({
   id,
-  tasks,
+  tasks = [],
 }: {
   id: string;
-  tasks: Task[];
+  tasks?: Task[];
 }) {
-  const [tableData, setTableData] = React.useState<Task[]>(tasks);
+  const [tableData, setTableData] = React.useState<Task[]>(tasks ?? []);
   const [open, setOpen] = React.useState(false);
   const [editIndex, setEditIndex] = React.useState<number | null>(null);
   const [formData, setFormData] = React.useState<Task>({
@@ -36,7 +36,9 @@ export default function TaskTable({
   });
 
   React.useEffect(() => {
-    setTableData(tasks);
+    if (Array.isArray(tasks)) {
+        setTableData(tasks);
+    }
   }, [tasks]);
 
   React.useEffect(() => {
@@ -124,7 +126,7 @@ export default function TaskTable({
           </tr>
         </thead>
         <tbody>
-          {tableData.map((task, index) => (
+          {tableData.length > 0 && tableData.map((task, index) => (
             <tr key={index}>
               <td>{task.Name}</td>
               <td>{task.Assignee?.Name ?? ""}</td>

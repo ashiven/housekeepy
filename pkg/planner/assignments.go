@@ -4,27 +4,27 @@ import (
 	"math/rand"
 )
 
-func (household *Household) UpdateCurrentMember() {
-	household.currentMember = household.Members[household.currentMemberIndex]
-	household.currentMemberIndex++
-	if household.currentMemberIndex >= len(household.Members) {
-		household.currentMemberIndex = 0
+func (h *Household) UpdateCurrentMember() {
+	h.currentMember = h.Members[h.currentMemberIndex]
+	h.currentMemberIndex++
+	if h.currentMemberIndex >= len(h.Members) {
+		h.currentMemberIndex = 0
 	}
 }
 
-func (household *Household) AssignDailyTasks() {
-	rand.Shuffle(len(household.DailyTasks), func(i, j int) {
-		household.DailyTasks[i], household.DailyTasks[j] = household.DailyTasks[j], household.DailyTasks[i]
+func (h *Household) AssignDailyTasks() {
+	rand.Shuffle(len(h.DailyTasks), func(i, j int) {
+		h.DailyTasks[i], h.DailyTasks[j] = h.DailyTasks[j], h.DailyTasks[i]
 	})
 
-	shuffledMembers := make([]*Member, len(household.Members))
-	copy(shuffledMembers, (household.Members))
+	shuffledMembers := make([]*Member, len(h.Members))
+	copy(shuffledMembers, (h.Members))
 	rand.Shuffle(len(shuffledMembers), func(i, j int) {
 		shuffledMembers[i], shuffledMembers[j] = shuffledMembers[j], shuffledMembers[i]
 	})
 
 	assigneeIndex := 0
-	for _, task := range household.DailyTasks {
+	for _, task := range h.DailyTasks {
 		task.SetAssignee(shuffledMembers[assigneeIndex])
 		assigneeIndex++
 		if assigneeIndex >= len(shuffledMembers) {
@@ -33,78 +33,78 @@ func (household *Household) AssignDailyTasks() {
 	}
 }
 
-func (household *Household) AssignWeeklyTasks() {
-	if household.remainingWeeklyTasks == 0 {
-		household.remainingWeeklyTasks = len(household.WeeklyTasks)
+func (h *Household) AssignWeeklyTasks() {
+	if h.remainingWeeklyTasks == 0 {
+		h.remainingWeeklyTasks = len(h.WeeklyTasks)
 	}
 
 	amountAdded := 0
-	weeklyTasksPerDay := max(len(household.WeeklyTasks)/len(household.Members), 1)
-	for amountAdded < weeklyTasksPerDay && household.remainingWeeklyTasks > 0 {
-		currentTaskIndex := len(household.WeeklyTasks) - household.remainingWeeklyTasks
-		task := household.WeeklyTasks[currentTaskIndex]
-		task.SetAssignee(household.currentMember)
+	weeklyTasksPerDay := max(len(h.WeeklyTasks)/len(h.Members), 1)
+	for amountAdded < weeklyTasksPerDay && h.remainingWeeklyTasks > 0 {
+		currentTaskIndex := len(h.WeeklyTasks) - h.remainingWeeklyTasks
+		task := h.WeeklyTasks[currentTaskIndex]
+		task.SetAssignee(h.currentMember)
 
-		household.remainingWeeklyTasks--
+		h.remainingWeeklyTasks--
 		amountAdded++
 	}
 }
 
-func (household *Household) AssignMonthlyTasks() {
-	if household.remainingMonthlyTasks == 0 {
-		household.remainingMonthlyTasks = len(household.MonthlyTasks)
+func (h *Household) AssignMonthlyTasks() {
+	if h.remainingMonthlyTasks == 0 {
+		h.remainingMonthlyTasks = len(h.MonthlyTasks)
 	}
 
-	randomMember := household.Members[rand.Intn(len(household.Members))]
-	for randomMember.Name == household.currentMember.Name {
-		randomMember = household.Members[rand.Intn(len(household.Members))]
+	randomMember := h.Members[rand.Intn(len(h.Members))]
+	for randomMember.Name == h.currentMember.Name {
+		randomMember = h.Members[rand.Intn(len(h.Members))]
 	}
 
-	taskIntervalMonth := 30 / len(household.MonthlyTasks)
-	if household.dayOfTheMonth%taskIntervalMonth == 0 && household.remainingMonthlyTasks > 0 {
-		currentTaskIndex := len(household.MonthlyTasks) - household.remainingMonthlyTasks
-		task := household.MonthlyTasks[currentTaskIndex]
+	taskIntervalMonth := 30 / len(h.MonthlyTasks)
+	if h.dayOfTheMonth%taskIntervalMonth == 0 && h.remainingMonthlyTasks > 0 {
+		currentTaskIndex := len(h.MonthlyTasks) - h.remainingMonthlyTasks
+		task := h.MonthlyTasks[currentTaskIndex]
 		task.SetAssignee(randomMember)
 
-		household.remainingMonthlyTasks--
+		h.remainingMonthlyTasks--
 	}
 
-	household.dayOfTheMonth++
-	if household.dayOfTheMonth > 30 {
-		household.dayOfTheMonth = 1
+	h.dayOfTheMonth++
+	if h.dayOfTheMonth > 30 {
+		h.dayOfTheMonth = 1
 	}
 }
 
-func (household *Household) ClearAssignments() {
-	for _, task := range household.DailyTasks {
+func (h *Household) ClearAssignments() {
+	for _, task := range h.DailyTasks {
 		task.SetAssignee(nil)
 	}
-	for _, task := range household.WeeklyTasks {
+	for _, task := range h.WeeklyTasks {
 		task.SetAssignee(nil)
 	}
-	for _, task := range household.MonthlyTasks {
+	for _, task := range h.MonthlyTasks {
 		task.SetAssignee(nil)
 	}
 }
 
-func (household *Household) GetAssignedTasks(member *Member) []Assignable {
+func (h *Household) GetAssignedTasks(member *Member) []Assignable {
 	assignedTasks := []Assignable{}
 
-	for _, task := range household.DailyTasks {
+	for _, task := range h.DailyTasks {
 		assignee := task.GetAssignee()
 		if assignee != nil && assignee.Name == member.Name {
 			assignedTasks = append(assignedTasks, task)
 		}
 	}
 
-	for _, task := range household.WeeklyTasks {
+	for _, task := range h.WeeklyTasks {
 		assignee := task.GetAssignee()
 		if assignee != nil && assignee.Name == member.Name {
 			assignedTasks = append(assignedTasks, task)
 		}
 	}
 
-	for _, task := range household.MonthlyTasks {
+	for _, task := range h.MonthlyTasks {
 		assignee := task.GetAssignee()
 		if assignee != nil && assignee.Name == member.Name {
 			assignedTasks = append(assignedTasks, task)
