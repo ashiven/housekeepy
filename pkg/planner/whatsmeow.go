@@ -65,7 +65,7 @@ func Login(client *whatsmeow.Client) {
 func PhoneNumbersToJIDs(client *whatsmeow.Client, phoneNumbers []string) map[string]types.JID {
 	JIDs := map[string]types.JID{}
 
-	isOnWhatsAppRes, err := client.IsOnWhatsApp(phoneNumbers)
+	isOnWhatsAppRes, err := client.IsOnWhatsApp(context.Background(), phoneNumbers)
 	if err != nil {
 		fmt.Println("[ERROR] IsOnWhatsApp: ", err)
 	}
