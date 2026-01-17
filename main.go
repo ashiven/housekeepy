@@ -29,13 +29,6 @@ func main() {
 	go backend.StartServer()
 
 	for {
-		if debug {
-			fmt.Println("[DEBUG] Starting next day in one minute...: ")
-			time.Sleep(1 * time.Minute)
-		} else {
-			planner.WaitUntilNoon()
-		}
-
 		fmt.Println("[INFO] A new day has started, assigning tasks...")
 
 		myHousehold.ClearAssignments()
@@ -82,6 +75,13 @@ func main() {
 				assignedTasks := myHousehold.GetAssignedTasks(member)
 				planner.SendMessageSms(client, member, assignedTasks, debug)
 			}
+		}
+
+		if debug {
+			fmt.Println("[DEBUG] Starting next day in one minute...: ")
+			time.Sleep(1 * time.Minute)
+		} else {
+			planner.WaitUntilNoon()
 		}
 	}
 }
