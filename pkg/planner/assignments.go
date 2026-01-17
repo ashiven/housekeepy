@@ -41,7 +41,7 @@ func (h *Household) AssignWeeklyTasks() {
 	amountAdded := 0
 	weeklyTasksPerDay := max(len(h.WeeklyTasks)/len(h.Members), 1)
 	for amountAdded < weeklyTasksPerDay && h.remainingWeeklyTasks > 0 {
-		currentTaskIndex := len(h.WeeklyTasks) - h.remainingWeeklyTasks
+		currentTaskIndex := max(len(h.WeeklyTasks) - h.remainingWeeklyTasks, 0)
 		task := h.WeeklyTasks[currentTaskIndex]
 		task.SetAssignee(h.currentMember)
 
@@ -62,7 +62,7 @@ func (h *Household) AssignMonthlyTasks() {
 
 	taskIntervalMonth := 30 / len(h.MonthlyTasks)
 	if h.dayOfTheMonth%taskIntervalMonth == 0 && h.remainingMonthlyTasks > 0 {
-		currentTaskIndex := len(h.MonthlyTasks) - h.remainingMonthlyTasks
+		currentTaskIndex := max(len(h.MonthlyTasks) - h.remainingMonthlyTasks, 0)
 		task := h.MonthlyTasks[currentTaskIndex]
 		task.SetAssignee(randomMember)
 
